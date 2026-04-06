@@ -1,0 +1,1425 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Content Studio | Lead Intelligence Report | April 6, 2026</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ===== RESET & BASE ===== */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --brand-teal: #02A39e;
+  --accent: #40e0d0;
+  --light-blue: #87ceeb;
+  --deep-teal: #008b8b;
+  --bg-primary: #0a0f1a;
+  --bg-secondary: #111827;
+  --bg-card: #1a2235;
+  --bg-card-hover: #1e2a42;
+  --border: #2a3550;
+  --text-primary: #e8ecf4;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
+  --green: #22c55e;
+  --yellow: #eab308;
+  --red: #ef4444;
+  --orange: #f97316;
+  --radius: 12px;
+  --radius-sm: 8px;
+  --shadow: 0 4px 24px rgba(0,0,0,0.3);
+  --shadow-lg: 0 8px 40px rgba(0,0,0,0.4);
+  --transition: 0.25s ease;
+}
+
+html { scroll-behavior: smooth; font-size: 16px; }
+
+body {
+  font-family: 'Outfit', sans-serif;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, h4 { font-family: 'DM Serif Display', serif; font-weight: 400; }
+
+/* ===== LAYOUT ===== */
+.dashboard { display: flex; min-height: 100vh; }
+
+.sidebar {
+  position: fixed;
+  left: 0; top: 0;
+  width: 260px;
+  height: 100vh;
+  background: var(--bg-secondary);
+  border-right: 1px solid var(--border);
+  padding: 32px 20px;
+  overflow-y: auto;
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+}
+
+.sidebar-logo {
+  font-family: 'DM Serif Display', serif;
+  font-size: 1.25rem;
+  color: var(--accent);
+  margin-bottom: 8px;
+}
+
+.sidebar-subtitle {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin-bottom: 32px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--border);
+}
+
+.sidebar nav { flex: 1; }
+
+.sidebar nav a {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  border-radius: var(--radius-sm);
+  color: var(--text-secondary);
+  text-decoration: none;
+  font-size: 0.85rem;
+  font-weight: 500;
+  transition: all var(--transition);
+  margin-bottom: 2px;
+}
+
+.sidebar nav a:hover, .sidebar nav a.active {
+  background: rgba(2,163,158,0.12);
+  color: var(--accent);
+}
+
+.sidebar nav a .nav-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--text-muted);
+  flex-shrink: 0;
+  transition: all var(--transition);
+}
+
+.sidebar nav a:hover .nav-dot, .sidebar nav a.active .nav-dot {
+  background: var(--accent);
+  box-shadow: 0 0 8px var(--accent);
+}
+
+.sidebar-footer {
+  margin-top: auto;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  line-height: 1.8;
+}
+
+.main {
+  margin-left: 260px;
+  flex: 1;
+  padding: 0;
+}
+
+/* ===== HERO ===== */
+.hero {
+  position: relative;
+  padding: 80px 48px 60px;
+  background: linear-gradient(135deg, rgba(2,163,158,0.15) 0%, rgba(64,224,208,0.05) 50%, rgba(135,206,235,0.08) 100%);
+  border-bottom: 1px solid var(--border);
+  overflow: hidden;
+}
+
+.hero::before {
+  content: '';
+  position: absolute;
+  top: -50%; right: -20%;
+  width: 600px; height: 600px;
+  background: radial-gradient(circle, rgba(2,163,158,0.12) 0%, transparent 70%);
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(2,163,158,0.15);
+  border: 1px solid rgba(2,163,158,0.3);
+  border-radius: 20px;
+  padding: 6px 16px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--accent);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 20px;
+}
+
+.hero-badge .pulse {
+  width: 8px; height: 8px;
+  background: var(--accent);
+  border-radius: 50%;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(1.5); }
+}
+
+.hero h1 {
+  font-size: 2.75rem;
+  line-height: 1.15;
+  margin-bottom: 12px;
+  background: linear-gradient(135deg, var(--text-primary) 0%, var(--accent) 60%, var(--light-blue) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.hero-subtitle {
+  font-size: 1.05rem;
+  color: var(--text-secondary);
+  max-width: 600px;
+}
+
+.hero-date {
+  margin-top: 20px;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+/* ===== SECTIONS ===== */
+.section {
+  padding: 48px;
+  border-bottom: 1px solid var(--border);
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 28px;
+}
+
+.section-header h2 {
+  font-size: 1.75rem;
+  color: var(--text-primary);
+}
+
+.section-header .section-icon {
+  width: 40px; height: 40px;
+  background: linear-gradient(135deg, var(--brand-teal), var(--accent));
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  flex-shrink: 0;
+}
+
+/* ===== STAT CARDS ===== */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+}
+
+.stat-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 24px;
+  transition: all var(--transition);
+  position: relative;
+  overflow: hidden;
+}
+
+.stat-card:hover {
+  transform: translateY(-4px);
+  border-color: rgba(2,163,158,0.4);
+  box-shadow: var(--shadow);
+}
+
+.stat-card::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 3px;
+  background: linear-gradient(90deg, var(--brand-teal), var(--accent));
+}
+
+.stat-value {
+  font-family: 'DM Serif Display', serif;
+  font-size: 2.5rem;
+  background: linear-gradient(135deg, var(--accent), var(--light-blue));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 4px;
+}
+
+.stat-label {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.stat-detail {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin-top: 8px;
+}
+
+/* ===== TABLES ===== */
+.table-wrap {
+  overflow-x: auto;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+}
+
+thead {
+  background: rgba(2,163,158,0.08);
+}
+
+th {
+  text-align: left;
+  padding: 14px 18px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-bottom: 1px solid var(--border);
+}
+
+td {
+  padding: 14px 18px;
+  border-bottom: 1px solid rgba(42,53,80,0.5);
+  color: var(--text-primary);
+}
+
+tr:hover td { background: rgba(2,163,158,0.04); }
+
+tr:last-child td { border-bottom: none; }
+
+/* ===== BADGES ===== */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.badge-high { background: rgba(34,197,94,0.15); color: var(--green); border: 1px solid rgba(34,197,94,0.3); }
+.badge-medium { background: rgba(234,179,8,0.15); color: var(--yellow); border: 1px solid rgba(234,179,8,0.3); }
+.badge-low { background: rgba(100,116,139,0.15); color: var(--text-muted); border: 1px solid rgba(100,116,139,0.3); }
+.badge-monitor { background: rgba(249,115,22,0.15); color: var(--orange); border: 1px solid rgba(249,115,22,0.3); }
+
+.score-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 52px;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.score-high { background: rgba(34,197,94,0.15); color: var(--green); }
+.score-medium { background: rgba(234,179,8,0.15); color: var(--yellow); }
+.score-low { background: rgba(100,116,139,0.15); color: var(--text-muted); }
+
+/* ===== CARDS ===== */
+.card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 28px;
+  margin-bottom: 20px;
+  transition: all var(--transition);
+}
+
+.card:hover {
+  border-color: rgba(2,163,158,0.3);
+  box-shadow: var(--shadow);
+}
+
+.card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.card h3 {
+  font-size: 1.25rem;
+  color: var(--text-primary);
+}
+
+/* ===== EXPANDABLE ===== */
+.expandable { cursor: pointer; user-select: none; }
+
+.expandable .expand-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px; height: 28px;
+  border-radius: 6px;
+  background: rgba(2,163,158,0.12);
+  color: var(--accent);
+  font-size: 0.85rem;
+  transition: all var(--transition);
+}
+
+.expandable.open .expand-icon { transform: rotate(180deg); }
+
+.expand-content {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.4s ease;
+}
+
+.expand-content.open { max-height: 5000px; }
+
+/* ===== RESEARCH DETAIL ===== */
+.detail-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.detail-item {
+  background: rgba(2,163,158,0.04);
+  border: 1px solid rgba(42,53,80,0.6);
+  border-radius: var(--radius-sm);
+  padding: 16px;
+}
+
+.detail-item .label {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-muted);
+  margin-bottom: 6px;
+  font-weight: 600;
+}
+
+.detail-item .value {
+  font-size: 0.95rem;
+  color: var(--text-primary);
+  font-weight: 500;
+}
+
+.highlight-box {
+  background: linear-gradient(135deg, rgba(2,163,158,0.1) 0%, rgba(64,224,208,0.05) 100%);
+  border: 1px solid rgba(2,163,158,0.25);
+  border-radius: var(--radius);
+  padding: 20px;
+  margin: 16px 0;
+}
+
+.highlight-box h4 {
+  color: var(--accent);
+  font-size: 1rem;
+  margin-bottom: 10px;
+}
+
+.highlight-box ul { list-style: none; }
+
+.highlight-box li {
+  position: relative;
+  padding-left: 20px;
+  margin-bottom: 8px;
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+}
+
+.highlight-box li::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 10px;
+  width: 6px; height: 6px;
+  background: var(--accent);
+  border-radius: 50%;
+}
+
+/* ===== STEPS LIST ===== */
+.steps-list { counter-reset: step; list-style: none; }
+
+.steps-list li {
+  counter-increment: step;
+  position: relative;
+  padding: 16px 16px 16px 56px;
+  margin-bottom: 12px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-size: 0.9rem;
+  transition: all var(--transition);
+}
+
+.steps-list li:hover {
+  border-color: rgba(2,163,158,0.3);
+  transform: translateX(4px);
+}
+
+.steps-list li::before {
+  content: counter(step);
+  position: absolute;
+  left: 16px; top: 14px;
+  width: 28px; height: 28px;
+  background: linear-gradient(135deg, var(--brand-teal), var(--accent));
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.steps-list li .step-label {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.steps-list li .step-detail {
+  color: var(--text-secondary);
+  font-size: 0.8rem;
+  margin-top: 4px;
+}
+
+/* ===== CHARTS (CSS/SVG) ===== */
+.chart-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  margin-top: 20px;
+}
+
+.chart-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 24px;
+}
+
+.chart-card h4 {
+  font-size: 1rem;
+  margin-bottom: 20px;
+  color: var(--text-secondary);
+}
+
+.bar-chart { display: flex; flex-direction: column; gap: 14px; }
+
+.bar-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.bar-label {
+  width: 100px;
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  text-align: right;
+  flex-shrink: 0;
+}
+
+.bar-track {
+  flex: 1;
+  height: 28px;
+  background: rgba(42,53,80,0.5);
+  border-radius: 6px;
+  overflow: hidden;
+  position: relative;
+}
+
+.bar-fill {
+  height: 100%;
+  border-radius: 6px;
+  transition: width 1s ease;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding-right: 10px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: white;
+}
+
+.bar-fill.high { background: linear-gradient(90deg, var(--brand-teal), var(--green)); }
+.bar-fill.medium { background: linear-gradient(90deg, var(--brand-teal), var(--yellow)); }
+.bar-fill.low { background: linear-gradient(90deg, var(--brand-teal), var(--text-muted)); }
+
+/* Donut chart */
+.donut-wrap {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+
+.donut-legend { display: flex; flex-direction: column; gap: 10px; }
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+}
+
+.legend-dot {
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+/* ===== PIPELINE ===== */
+.pipeline-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+}
+
+.pipeline-item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 18px;
+  transition: all var(--transition);
+}
+
+.pipeline-item:hover {
+  border-color: rgba(2,163,158,0.3);
+  transform: translateY(-2px);
+}
+
+.pipeline-num {
+  font-family: 'DM Serif Display', serif;
+  font-size: 1.75rem;
+  color: var(--accent);
+  min-width: 44px;
+}
+
+.pipeline-text {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+}
+
+/* ===== FOOTER ===== */
+.dashboard-footer {
+  padding: 40px 48px;
+  background: var(--bg-secondary);
+  border-top: 1px solid var(--border);
+  text-align: center;
+}
+
+.dashboard-footer .footer-brand {
+  font-family: 'DM Serif Display', serif;
+  font-size: 1.1rem;
+  color: var(--accent);
+  margin-bottom: 4px;
+}
+
+.dashboard-footer p {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin-bottom: 4px;
+}
+
+.confidential {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 12px;
+  padding: 6px 16px;
+  background: rgba(239,68,68,0.1);
+  border: 1px solid rgba(239,68,68,0.2);
+  border-radius: 20px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--red);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+/* ===== SCROLL ANIMATIONS ===== */
+.fade-up {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 0.5s ease, transform 0.5s ease;
+}
+
+.fade-up.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ===== MOBILE SIDEBAR TOGGLE ===== */
+.mobile-toggle {
+  display: none;
+  position: fixed;
+  top: 16px; left: 16px;
+  z-index: 200;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 12px;
+  color: var(--accent);
+  cursor: pointer;
+  font-size: 1.2rem;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 1024px) {
+  .stats-grid { grid-template-columns: repeat(2, 1fr); }
+  .chart-container { grid-template-columns: 1fr; }
+  .detail-grid { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 768px) {
+  .mobile-toggle { display: flex; }
+
+  .sidebar {
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+    z-index: 150;
+  }
+
+  .sidebar.open { transform: translateX(0); }
+
+  .main { margin-left: 0; }
+
+  .hero, .section { padding: 32px 20px; }
+
+  .hero h1 { font-size: 1.75rem; }
+
+  .stats-grid { grid-template-columns: 1fr; }
+
+  .pipeline-grid { grid-template-columns: 1fr; }
+
+  .dashboard-footer { padding: 32px 20px; }
+}
+
+/* ===== PRINT STYLES ===== */
+@media print {
+  body { background: white; color: #1a1a1a; font-size: 11pt; }
+
+  .sidebar, .mobile-toggle { display: none !important; }
+
+  .main { margin-left: 0; }
+
+  .hero, .section, .dashboard-footer {
+    padding: 20px 0;
+    border: none;
+    break-inside: avoid;
+  }
+
+  .hero { background: none; }
+
+  .hero h1 {
+    -webkit-text-fill-color: #1a1a1a;
+    background: none;
+    font-size: 24pt;
+  }
+
+  .card, .stat-card, .pipeline-item {
+    background: white;
+    border: 1px solid #ddd;
+    box-shadow: none;
+    break-inside: avoid;
+  }
+
+  .stat-value {
+    -webkit-text-fill-color: var(--brand-teal);
+    background: none;
+  }
+
+  .badge-high { background: #e6f9ee; color: #166534; }
+  .badge-medium { background: #fef9c3; color: #854d0e; }
+
+  table { font-size: 9pt; }
+
+  th { background: #f3f4f6; }
+
+  td, th { border: 1px solid #ddd; }
+
+  .expand-content { max-height: none !important; overflow: visible !important; }
+
+  .expandable .expand-icon { display: none; }
+
+  .confidential { background: #fef2f2; }
+
+  .fade-up { opacity: 1 !important; transform: none !important; }
+
+  .bar-fill { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+
+  svg { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+}
+</style>
+</head>
+<body>
+
+<!-- Mobile Menu Toggle -->
+<button class="mobile-toggle" onclick="document.querySelector('.sidebar').classList.toggle('open')" aria-label="Toggle navigation">&#9776;</button>
+
+<div class="dashboard">
+
+<!-- ===== SIDEBAR ===== -->
+<aside class="sidebar">
+  <div class="sidebar-logo">Content Studio</div>
+  <div class="sidebar-subtitle">Lead Intelligence Dashboard</div>
+  <nav>
+    <a href="#hero" class="active"><span class="nav-dot"></span> Overview</a>
+    <a href="#summary"><span class="nav-dot"></span> Executive Summary</a>
+    <a href="#matrix"><span class="nav-dot"></span> Lead Priority Matrix</a>
+    <a href="#dams"><span class="nav-dot"></span> DAMS Delhi</a>
+    <a href="#osmosis"><span class="nav-dot"></span> Osmosis</a>
+    <a href="#icme"><span class="nav-dot"></span> ICME India</a>
+    <a href="#landscape"><span class="nav-dot"></span> Market Landscape</a>
+    <a href="#pipeline"><span class="nav-dot"></span> Pipeline Status</a>
+    <a href="#next-steps"><span class="nav-dot"></span> Next Steps</a>
+  </nav>
+  <div class="sidebar-footer">
+    Content Studio Intelligence<br>
+    Sector 65, Gurugram<br>
+    April 6, 2026
+  </div>
+</aside>
+
+<!-- ===== MAIN CONTENT ===== -->
+<main class="main">
+
+  <!-- HERO -->
+  <section class="hero" id="hero">
+    <div class="hero-badge"><span class="pulse"></span> Intelligence Report</div>
+    <h1>Content Studio<br>Lead Intelligence Report</h1>
+    <p class="hero-subtitle">Market scan, competitor analysis, and high-priority prospect research for Content Studio's growth strategy.</p>
+    <p class="hero-date">Report Date: April 6, 2026 &mdash; Gurugram, Haryana</p>
+  </section>
+
+  <!-- EXECUTIVE SUMMARY -->
+  <section class="section" id="summary">
+    <div class="section-header fade-up">
+      <div class="section-icon">&#x1F4CA;</div>
+      <h2>Executive Summary</h2>
+    </div>
+    <div class="stats-grid fade-up">
+      <div class="stat-card">
+        <div class="stat-value">8</div>
+        <div class="stat-label">Search Queries Executed</div>
+        <div class="stat-detail">Across marketplaces, directories, and industry databases</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value">27</div>
+        <div class="stat-label">Leads Identified</div>
+        <div class="stat-detail">Competitors, clients, and partnership prospects</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value">4</div>
+        <div class="stat-label">Reports Generated</div>
+        <div class="stat-detail">Deep research on prospects and market landscape</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value">1</div>
+        <div class="stat-label">High-Priority Prospect</div>
+        <div class="stat-detail">DAMS Delhi &mdash; Scored 4.7 / 5</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- LEAD PRIORITY MATRIX -->
+  <section class="section" id="matrix">
+    <div class="section-header fade-up">
+      <div class="section-icon">&#x1F3AF;</div>
+      <h2>Lead Priority Matrix</h2>
+    </div>
+    <div class="table-wrap fade-up">
+      <table>
+        <thead>
+          <tr>
+            <th>Company</th>
+            <th>Type</th>
+            <th>Score</th>
+            <th>Priority</th>
+            <th>Next Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>DAMS Delhi</strong></td>
+            <td>Potential Client</td>
+            <td><span class="score-badge score-high">4.7 / 5</span></td>
+            <td><span class="badge badge-high">&#x25CF; HIGH</span></td>
+            <td>Outreach to Dr. Sumer Sethi</td>
+          </tr>
+          <tr>
+            <td><strong>Osmosis</strong></td>
+            <td>Potential Client</td>
+            <td><span class="score-badge score-medium">6 / 10</span></td>
+            <td><span class="badge badge-monitor">&#x25CF; MONITOR</span></td>
+            <td>Watch for India expansion signals</td>
+          </tr>
+          <tr>
+            <td><strong>ICME India</strong></td>
+            <td>Potential Client</td>
+            <td><span class="score-badge score-low">MEDIUM</span></td>
+            <td><span class="badge badge-low">&#x25CF; LOW</span></td>
+            <td>Pilot offer if approached</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Charts -->
+    <div class="chart-container fade-up">
+      <!-- Bar Chart -->
+      <div class="chart-card">
+        <h4>Prospect Score Comparison</h4>
+        <div class="bar-chart">
+          <div class="bar-row">
+            <span class="bar-label">DAMS Delhi</span>
+            <div class="bar-track">
+              <div class="bar-fill high" style="width: 94%;">4.7 / 5</div>
+            </div>
+          </div>
+          <div class="bar-row">
+            <span class="bar-label">Osmosis</span>
+            <div class="bar-track">
+              <div class="bar-fill medium" style="width: 60%;">6 / 10</div>
+            </div>
+          </div>
+          <div class="bar-row">
+            <span class="bar-label">ICME India</span>
+            <div class="bar-track">
+              <div class="bar-fill low" style="width: 35%;">LOW</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Donut Chart (SVG) -->
+      <div class="chart-card">
+        <h4>Competitor Threat Distribution</h4>
+        <div class="donut-wrap">
+          <svg width="140" height="140" viewBox="0 0 140 140">
+            <!-- HIGH: 2 of 11 = ~18% = 65deg -->
+            <circle cx="70" cy="70" r="54" fill="none" stroke="rgba(42,53,80,0.3)" stroke-width="20"/>
+            <!-- LOW: 7 of 11 ~ 63.6% -->
+            <circle cx="70" cy="70" r="54" fill="none" stroke="#64748b" stroke-width="20"
+              stroke-dasharray="216 339.29" stroke-dashoffset="0" transform="rotate(-90 70 70)"/>
+            <!-- MEDIUM: 4 of 11 ~ 36.4% but we show 2 high, 4 med, 5+2 low -->
+            <!-- Recalc: HIGH=2, MEDIUM=4, LOW=5 total=11 -->
+            <!-- LOW = 5/11 = 154.3, MED = 4/11 = 123.4, HIGH = 2/11 = 61.7 -->
+            <circle cx="70" cy="70" r="54" fill="none" stroke="var(--yellow)" stroke-width="20"
+              stroke-dasharray="123.4 215.9" stroke-dashoffset="-154.3" transform="rotate(-90 70 70)"/>
+            <circle cx="70" cy="70" r="54" fill="none" stroke="var(--green)" stroke-width="20"
+              stroke-dasharray="61.7 277.6" stroke-dashoffset="-277.7" transform="rotate(-90 70 70)"/>
+            <text x="70" y="66" text-anchor="middle" fill="var(--text-primary)" font-family="DM Serif Display" font-size="22">11</text>
+            <text x="70" y="84" text-anchor="middle" fill="var(--text-muted)" font-family="Outfit" font-size="10">competitors</text>
+          </svg>
+          <div class="donut-legend">
+            <div class="legend-item"><span class="legend-dot" style="background:var(--green)"></span> HIGH Threat (2)</div>
+            <div class="legend-item"><span class="legend-dot" style="background:var(--yellow)"></span> MEDIUM Threat (4)</div>
+            <div class="legend-item"><span class="legend-dot" style="background:#64748b"></span> LOW Threat (5)</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- DAMS DELHI -->
+  <section class="section" id="dams">
+    <div class="section-header fade-up">
+      <div class="section-icon">&#x2B50;</div>
+      <h2>DAMS Delhi &mdash; Deep Research</h2>
+    </div>
+
+    <div class="card fade-up">
+      <div class="card-header expandable" onclick="toggleExpand(this)">
+        <h3>Company Overview</h3>
+        <span class="expand-icon">&#x25BC;</span>
+      </div>
+      <div class="detail-grid">
+        <div class="detail-item">
+          <div class="label">Revenue</div>
+          <div class="value">$18.2M (estimated)</div>
+        </div>
+        <div class="detail-item">
+          <div class="label">Digital Platform</div>
+          <div class="value">eMedicoz &mdash; 500K+ users</div>
+        </div>
+        <div class="detail-item">
+          <div class="label">Team Size</div>
+          <div class="value">189 employees</div>
+        </div>
+        <div class="detail-item">
+          <div class="label">Founded</div>
+          <div class="value">1999 &mdash; Bootstrapped</div>
+        </div>
+      </div>
+      <div class="expand-content">
+        <div class="highlight-box">
+          <h4>Content Strategy Assessment</h4>
+          <ul>
+            <li>Massive video lecture library across medical disciplines</li>
+            <li>eMedicoz platform with 500K+ active learners</li>
+            <li>Production quality lags behind competitors (Marrow, PrepLadder)</li>
+            <li>User reviews consistently cite poor audio quality as a pain point</li>
+          </ul>
+        </div>
+
+        <div class="highlight-box" style="border-color: rgba(239,68,68,0.25); background: linear-gradient(135deg, rgba(239,68,68,0.06) 0%, rgba(249,115,22,0.03) 100%);">
+          <h4 style="color: var(--orange);">The Gap &mdash; Critical Opportunity</h4>
+          <ul>
+            <li>Losing market share to Marrow and PrepLadder on production quality</li>
+            <li>User reviews explicitly cite poor audio/video as a reason for switching</li>
+            <li>Strong content, weak production &mdash; ideal for Content Studio's services</li>
+            <li>No in-house production team or dedicated studio infrastructure</li>
+          </ul>
+        </div>
+
+        <div class="highlight-box" style="border-color: rgba(34,197,94,0.25); background: linear-gradient(135deg, rgba(34,197,94,0.06) 0%, rgba(2,163,158,0.03) 100%);">
+          <h4 style="color: var(--green);">Budget Signals</h4>
+          <ul>
+            <li>$18.2M revenue &mdash; strong financial capacity</li>
+            <li>Profitable and self-funded (no investor pressure)</li>
+            <li>Active investment in digital platform expansion</li>
+            <li>Bootstrapped since 1999 &mdash; disciplined but willing to invest in growth</li>
+          </ul>
+        </div>
+
+        <div class="highlight-box">
+          <h4>Content Studio Angle</h4>
+          <ul>
+            <li>Pilot project with Dr. Sumer Sethi &mdash; relationship-based entry</li>
+            <li>AI audio enhancement on existing lecture library (immediate ROI)</li>
+            <li>Upgrade path: audio cleanup &rarr; video enhancement &rarr; full production</li>
+            <li>Position as production partner, not vendor</li>
+          </ul>
+        </div>
+
+        <!-- Scoring Table -->
+        <h4 style="margin: 24px 0 12px; font-family: 'DM Serif Display', serif; color: var(--text-primary);">Scoring Breakdown</h4>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Dimension</th><th>Score</th><th>Notes</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>Content Need</td><td><span class="score-badge score-high">5 / 5</span></td><td>Massive library, poor quality</td></tr>
+              <tr><td>Budget Capacity</td><td><span class="score-badge score-high">5 / 5</span></td><td>$18.2M, profitable, self-funded</td></tr>
+              <tr><td>Decision Access</td><td><span class="score-badge score-high">4.5 / 5</span></td><td>Direct path to Dr. Sumer Sethi</td></tr>
+              <tr><td>Service Fit</td><td><span class="score-badge score-high">5 / 5</span></td><td>Audio/video enhancement + studio</td></tr>
+              <tr><td>Urgency</td><td><span class="score-badge score-medium">4 / 5</span></td><td>Competitor pressure building</td></tr>
+              <tr><td><strong>Overall</strong></td><td><span class="score-badge score-high"><strong>4.7 / 5</strong></span></td><td><strong>Top priority prospect</strong></td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h4 style="margin: 24px 0 12px; font-family: 'DM Serif Display', serif; color: var(--text-primary);">Recommended Approach</h4>
+        <ol class="steps-list">
+          <li>
+            <span class="step-label">Initial Contact via Dr. Sumer Sethi</span>
+            <div class="step-detail">Leverage existing network for warm introduction. Position as a production quality upgrade partner.</div>
+          </li>
+          <li>
+            <span class="step-label">AI Audio Enhancement Demo</span>
+            <div class="step-detail">Take 2-3 existing lectures and demonstrate before/after audio enhancement. Show immediate quality lift.</div>
+          </li>
+          <li>
+            <span class="step-label">Pilot Project Proposal</span>
+            <div class="step-detail">Propose a 10-lecture pilot with AI audio cleanup + light video enhancement. Fixed-fee structure.</div>
+          </li>
+          <li>
+            <span class="step-label">Full Production Partnership</span>
+            <div class="step-detail">Once pilot proves ROI, expand to full studio production for new course content. Monthly retainer model.</div>
+          </li>
+        </ol>
+      </div>
+    </div>
+  </section>
+
+  <!-- OSMOSIS -->
+  <section class="section" id="osmosis">
+    <div class="section-header fade-up">
+      <div class="section-icon">&#x1F52C;</div>
+      <h2>Osmosis Research Summary</h2>
+    </div>
+    <div class="card fade-up">
+      <div class="card-header expandable" onclick="toggleExpand(this)">
+        <h3>Company Profile</h3>
+        <span class="expand-icon">&#x25BC;</span>
+      </div>
+      <div class="detail-grid">
+        <div class="detail-item">
+          <div class="label">Platform</div>
+          <div class="value">Medical education &mdash; 3.59M YouTube subscribers</div>
+        </div>
+        <div class="detail-item">
+          <div class="label">Video Library</div>
+          <div class="value">2,100+ animated educational videos</div>
+        </div>
+        <div class="detail-item">
+          <div class="label">Parent Company</div>
+          <div class="value">Elsevier / RELX (GBP 3.2B profit)</div>
+        </div>
+        <div class="detail-item">
+          <div class="label">Production Team</div>
+          <div class="value">42-person in-house team, proprietary tools</div>
+        </div>
+      </div>
+      <div class="expand-content">
+        <div class="highlight-box">
+          <h4>Production Approach</h4>
+          <ul>
+            <li>100% in-house animation with proprietary rendering pipeline</li>
+            <li>42-person dedicated production team (animators, medical illustrators)</li>
+            <li>Custom tools built for medical content creation</li>
+            <li>Extremely unlikely to outsource core production</li>
+          </ul>
+        </div>
+        <div class="highlight-box">
+          <h4>Content Studio Angle</h4>
+          <ul>
+            <li>Diffusion Studios partnership for specialized India-focused content</li>
+            <li>India-localized content creation (Hindi/regional language adaptations)</li>
+            <li>Supplementary content that complements but doesn't compete with core animation</li>
+          </ul>
+        </div>
+        <div style="display:flex;align-items:center;gap:12px;margin-top:16px;">
+          <span style="font-size:0.9rem;color:var(--text-secondary);">Viability Score:</span>
+          <span class="score-badge score-medium" style="font-size:1rem;">6 / 10</span>
+          <span class="badge badge-monitor">MONITOR</span>
+          <span style="font-size:0.8rem;color:var(--text-muted);">&mdash; Watch for India expansion triggers</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ICME INDIA -->
+  <section class="section" id="icme">
+    <div class="section-header fade-up">
+      <div class="section-icon">&#x1F3EB;</div>
+      <h2>ICME India Research Summary</h2>
+    </div>
+    <div class="card fade-up">
+      <div class="card-header expandable" onclick="toggleExpand(this)">
+        <h3>Company Profile</h3>
+        <span class="expand-icon">&#x25BC;</span>
+      </div>
+      <div class="detail-grid">
+        <div class="detail-item">
+          <div class="label">Type</div>
+          <div class="value">22-year medical coaching institute</div>
+        </div>
+        <div class="detail-item">
+          <div class="label">Location</div>
+          <div class="value">Trivandrum, Kerala</div>
+        </div>
+        <div class="detail-item">
+          <div class="label">Digital Presence</div>
+          <div class="value">Near-zero (296 Instagram followers, no YouTube)</div>
+        </div>
+        <div class="detail-item">
+          <div class="label">Budget</div>
+          <div class="value">Modest &mdash; small founder-led institute</div>
+        </div>
+      </div>
+      <div class="expand-content">
+        <div class="highlight-box">
+          <h4>Content Studio Angle</h4>
+          <ul>
+            <li>Digital Content Starter Pack (INR 40-60K pilot)</li>
+            <li>Low-risk entry: social media content + basic video production</li>
+            <li>Potential for long-term digital transformation partnership</li>
+          </ul>
+        </div>
+        <div class="highlight-box" style="border-color: rgba(239,68,68,0.25); background: linear-gradient(135deg, rgba(239,68,68,0.06) 0%, rgba(249,115,22,0.03) 100%);">
+          <h4 style="color: var(--orange);">Risk Factors</h4>
+          <ul>
+            <li>Geographic distance (Trivandrum to Gurugram)</li>
+            <li>Budget sensitivity &mdash; small institute, founder-funded</li>
+            <li>Unproven digital appetite &mdash; may resist digital transition</li>
+          </ul>
+        </div>
+        <div style="display:flex;align-items:center;gap:12px;margin-top:16px;">
+          <span style="font-size:0.9rem;color:var(--text-secondary);">Priority:</span>
+          <span class="badge badge-low">LOW</span>
+          <span style="font-size:0.8rem;color:var(--text-muted);">&mdash; Pilot offer only if they approach first</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- MARKET LANDSCAPE -->
+  <section class="section" id="landscape">
+    <div class="section-header fade-up">
+      <div class="section-icon">&#x1F30D;</div>
+      <h2>Podcast Production Market Landscape</h2>
+    </div>
+
+    <!-- Competitor Table -->
+    <div class="card fade-up">
+      <div class="card-header expandable" onclick="toggleExpand(this)">
+        <h3>Competitor Analysis</h3>
+        <span class="expand-icon">&#x25BC;</span>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Company</th><th>Location</th><th>Positioning</th><th>Threat</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Cellar Door Studios</strong></td>
+              <td>Gurgaon</td>
+              <td>Premium podcast studio, 1000+ podcasts produced</td>
+              <td><span class="badge badge-high">HIGH</span></td>
+            </tr>
+            <tr>
+              <td><strong>Garage Productions</strong></td>
+              <td>Delhi NCR</td>
+              <td>Full-service content agency</td>
+              <td><span class="badge badge-medium">MEDIUM</span></td>
+            </tr>
+            <tr>
+              <td><strong>Dawar Studios</strong></td>
+              <td>Gurgaon</td>
+              <td>Studio rental + podcast production</td>
+              <td><span class="badge badge-medium">MEDIUM</span></td>
+            </tr>
+            <tr>
+              <td><strong>RAG Focus Studio</strong></td>
+              <td>Gurgaon</td>
+              <td>Chroma + podcast studio</td>
+              <td><span class="badge badge-medium">MEDIUM</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="expand-content">
+        <div class="table-wrap" style="margin-top: 16px;">
+          <table>
+            <thead>
+              <tr><th>Company</th><th>Location</th><th>Positioning</th><th>Threat</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>DigiLantern</td><td>Gurgaon</td><td>Video + podcast production</td><td><span class="badge badge-medium">MEDIUM</span></td></tr>
+              <tr><td>Starter Studio</td><td>Delhi</td><td>Budget podcast studio rental</td><td><span class="badge badge-low">LOW</span></td></tr>
+              <tr><td>Voxturr</td><td>Delhi NCR</td><td>Podcast marketing + distribution</td><td><span class="badge badge-low">LOW</span></td></tr>
+              <tr><td>The Starter Mic</td><td>Noida</td><td>Entry-level podcast services</td><td><span class="badge badge-low">LOW</span></td></tr>
+              <tr><td>Hubhopper Studios</td><td>Remote / Delhi</td><td>Podcast hosting + creation</td><td><span class="badge badge-low">LOW</span></td></tr>
+              <tr><td>SoundSphere</td><td>Gurgaon</td><td>Audio post-production</td><td><span class="badge badge-low">LOW</span></td></tr>
+              <tr><td>RecordBox Studio</td><td>Delhi</td><td>Music + podcast recording</td><td><span class="badge badge-low">LOW</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Freelance Rate Comparison -->
+        <h4 style="margin: 24px 0 12px; font-family: 'DM Serif Display', serif; color: var(--text-primary);">Freelance Rate Comparison</h4>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Service</th><th>Freelancer Rate</th><th>Studio Rate</th><th>Content Studio</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>Podcast Editing (per episode)</td><td>INR 1,500 - 3,000</td><td>INR 5,000 - 10,000</td><td>INR 8,000 - 15,000+</td></tr>
+              <tr><td>Studio Rental (per hour)</td><td>N/A</td><td>INR 2,000 - 5,000</td><td>INR 3,500 (premium)</td></tr>
+              <tr><td>Full Production (per episode)</td><td>INR 5,000 - 8,000</td><td>INR 12,000 - 25,000</td><td>INR 15,000+ (end-to-end)</td></tr>
+              <tr><td>Video Podcast (per episode)</td><td>INR 8,000 - 15,000</td><td>INR 20,000 - 40,000</td><td>INR 25,000+ (cinematic)</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Competitive Advantage -->
+        <h4 style="margin: 24px 0 12px; font-family: 'DM Serif Display', serif; color: var(--text-primary);">Content Studio Competitive Advantages</h4>
+        <div class="detail-grid">
+          <div class="detail-item">
+            <div class="label">AI Enhancement</div>
+            <div class="value">AI-powered audio/video enhancement unavailable from competitors</div>
+          </div>
+          <div class="detail-item">
+            <div class="label">Premium Positioning</div>
+            <div class="value">Cinematic quality production with modern studio infrastructure</div>
+          </div>
+          <div class="detail-item">
+            <div class="label">End-to-End Service</div>
+            <div class="value">Strategy &rarr; production &rarr; post-production &rarr; distribution</div>
+          </div>
+          <div class="detail-item">
+            <div class="label">Technology Edge</div>
+            <div class="value">GSAP-powered web presence, AI tools, modern workflows</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PIPELINE STATUS -->
+  <section class="section" id="pipeline">
+    <div class="section-header fade-up">
+      <div class="section-icon">&#x1F4C8;</div>
+      <h2>Pipeline Status</h2>
+    </div>
+    <div class="pipeline-grid fade-up">
+      <div class="pipeline-item">
+        <div class="pipeline-num">5</div>
+        <div class="pipeline-text">Marketplace sources pending<br><small style="color:var(--text-muted)">Upwork, IndiaMART, Clutch.co, Fiverr, Freelancer</small></div>
+      </div>
+      <div class="pipeline-item">
+        <div class="pipeline-num">9</div>
+        <div class="pipeline-text">Corporate video competitors<br><small style="color:var(--text-muted)">Cataloged with positioning and threat level</small></div>
+      </div>
+      <div class="pipeline-item">
+        <div class="pipeline-num">9</div>
+        <div class="pipeline-text">Podcast studio competitors<br><small style="color:var(--text-muted)">Delhi NCR market mapped comprehensively</small></div>
+      </div>
+      <div class="pipeline-item">
+        <div class="pipeline-num">3</div>
+        <div class="pipeline-text">Potential clients researched<br><small style="color:var(--text-muted)">DAMS Delhi, Osmosis, ICME India</small></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- NEXT STEPS -->
+  <section class="section" id="next-steps">
+    <div class="section-header fade-up">
+      <div class="section-icon">&#x1F680;</div>
+      <h2>Recommended Next Steps</h2>
+    </div>
+    <ol class="steps-list fade-up">
+      <li>
+        <span class="step-label">DAMS Delhi Outreach</span>
+        <div class="step-detail">Immediate priority. Initiate contact via Dr. Sumer Sethi with AI audio enhancement demo proposal. Target: this week.</div>
+      </li>
+      <li>
+        <span class="step-label">List on Clutch.co</span>
+        <div class="step-detail">Create a verified Clutch.co profile with case studies and client reviews. Key for B2B discovery in India.</div>
+      </li>
+      <li>
+        <span class="step-label">Set Up Upwork Alerts</span>
+        <div class="step-detail">Configure alerts for: podcast production India, corporate video Gurgaon, AI video enhancement. Bid on 3-5 relevant projects weekly.</div>
+      </li>
+      <li>
+        <span class="step-label">Monitor Osmosis for India Signals</span>
+        <div class="step-detail">Track Osmosis job postings, press releases, and LinkedIn activity for India expansion indicators. Quarterly check-in.</div>
+      </li>
+      <li>
+        <span class="step-label">Approach ICCPL Group for Referral Partnership</span>
+        <div class="step-detail">Explore mutual referral arrangement with established corporate video producers. Complementary services, not competing.</div>
+      </li>
+    </ol>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="dashboard-footer">
+    <div class="footer-brand">Content Studio</div>
+    <p>Sector 65, Gurugram, Haryana &bull; info@contentstudio.co.in &bull; +91 8920249869</p>
+    <p>Generated by Content Studio Intelligence &bull; April 6, 2026</p>
+    <div class="confidential">&#x1F512; Confidential &mdash; For Internal Use Only</div>
+  </footer>
+
+</main>
+</div>
+
+<script>
+// ===== EXPANDABLE SECTIONS =====
+function toggleExpand(header) {
+  const card = header.closest('.card');
+  const content = card.querySelector('.expand-content');
+  if (!content) return;
+  header.classList.toggle('open');
+  content.classList.toggle('open');
+}
+
+// Auto-expand all sections on load for first impression
+document.addEventListener('DOMContentLoaded', function() {
+  document.querySelectorAll('.expand-content').forEach(function(el) {
+    el.classList.add('open');
+  });
+  document.querySelectorAll('.expandable').forEach(function(el) {
+    el.classList.add('open');
+  });
+});
+
+// ===== SCROLL ANIMATIONS =====
+function handleScroll() {
+  var elements = document.querySelectorAll('.fade-up');
+  for (var i = 0; i < elements.length; i++) {
+    var el = elements[i];
+    var rect = el.getBoundingClientRect();
+    if (rect.top < window.innerHeight - 60) {
+      el.classList.add('visible');
+    }
+  }
+}
+
+window.addEventListener('scroll', handleScroll);
+window.addEventListener('load', handleScroll);
+
+// ===== ACTIVE NAV TRACKING =====
+function updateNav() {
+  var links = document.querySelectorAll('.sidebar nav a');
+  var sections = [];
+  for (var i = 0; i < links.length; i++) {
+    var href = links[i].getAttribute('href');
+    var section = document.querySelector(href);
+    if (section) sections.push({ link: links[i], section: section });
+  }
+
+  var scrollY = window.scrollY + 120;
+  var current = null;
+  for (var j = 0; j < sections.length; j++) {
+    if (sections[j].section.offsetTop <= scrollY) {
+      current = sections[j].link;
+    }
+  }
+
+  for (var k = 0; k < links.length; k++) {
+    links[k].classList.remove('active');
+  }
+  if (current) current.classList.add('active');
+}
+
+window.addEventListener('scroll', updateNav);
+window.addEventListener('load', updateNav);
+
+// ===== MOBILE SIDEBAR CLOSE ON NAV =====
+document.querySelectorAll('.sidebar nav a').forEach(function(link) {
+  link.addEventListener('click', function() {
+    if (window.innerWidth <= 768) {
+      document.querySelector('.sidebar').classList.remove('open');
+    }
+  });
+});
+</script>
+
+</body>
+</html>
