@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>graphify - graphify-out/graph.html</title>
+<script src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: #0f0f1a; color: #e0e0e0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; display: flex; height: 100vh; overflow: hidden; }
+  #graph { flex: 1; }
+  #sidebar { width: 280px; background: #1a1a2e; border-left: 1px solid #2a2a4e; display: flex; flex-direction: column; overflow: hidden; }
+  #search-wrap { padding: 12px; border-bottom: 1px solid #2a2a4e; }
+  #search { width: 100%; background: #0f0f1a; border: 1px solid #3a3a5e; color: #e0e0e0; padding: 7px 10px; border-radius: 6px; font-size: 13px; outline: none; }
+  #search:focus { border-color: #4E79A7; }
+  #search-results { max-height: 140px; overflow-y: auto; padding: 4px 12px; border-bottom: 1px solid #2a2a4e; display: none; }
+  .search-item { padding: 4px 6px; cursor: pointer; border-radius: 4px; font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .search-item:hover { background: #2a2a4e; }
+  #info-panel { padding: 14px; border-bottom: 1px solid #2a2a4e; min-height: 140px; }
+  #info-panel h3 { font-size: 13px; color: #aaa; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.05em; }
+  #info-content { font-size: 13px; color: #ccc; line-height: 1.6; }
+  #info-content .field { margin-bottom: 5px; }
+  #info-content .field b { color: #e0e0e0; }
+  #info-content .empty { color: #555; font-style: italic; }
+  .neighbor-link { display: block; padding: 2px 6px; margin: 2px 0; border-radius: 3px; cursor: pointer; font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; border-left: 3px solid #333; }
+  .neighbor-link:hover { background: #2a2a4e; }
+  #neighbors-list { max-height: 160px; overflow-y: auto; margin-top: 4px; }
+  #legend-wrap { flex: 1; overflow-y: auto; padding: 12px; }
+  #legend-wrap h3 { font-size: 13px; color: #aaa; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.05em; }
+  .legend-item { display: flex; align-items: center; gap: 8px; padding: 4px 0; cursor: pointer; border-radius: 4px; font-size: 12px; }
+  .legend-item:hover { background: #2a2a4e; padding-left: 4px; }
+  .legend-item.dimmed { opacity: 0.35; }
+  .legend-dot { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; }
+  .legend-label { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .legend-count { color: #666; font-size: 11px; }
+  #stats { padding: 10px 14px; border-top: 1px solid #2a2a4e; font-size: 11px; color: #555; }
+</style>
+</head>
+<body>
+<div id="graph"></div>
+<div id="sidebar">
+  <div id="search-wrap">
+    <input id="search" type="text" placeholder="Search nodes..." autocomplete="off">
+    <div id="search-results"></div>
+  </div>
+  <div id="info-panel">
+    <h3>Node Info</h3>
+    <div id="info-content"><span class="empty">Click a node to inspect it</span></div>
+  </div>
+  <div id="legend-wrap">
+    <h3>Communities</h3>
+    <div id="legend"></div>
+  </div>
+  <div id="stats">34 nodes &middot; 44 edges &middot; 7 communities</div>
+</div>
+<script>
+const RAW_NODES = [{"id": "research_dams_delhi_dams", "label": "DAMS (Delhi Academy of Medical Sciences)", "color": {"background": "#4E79A7", "border": "#4E79A7", "highlight": {"background": "#ffffff", "border": "#4E79A7"}}, "size": 40.0, "font": {"size": 12, "color": "#ffffff"}, "title": "DAMS (Delhi Academy of Medical Sciences)", "community": 0, "community_name": "DAMS Delhi Ecosystem", "source_file": "reports/research-dams-delhi-2026-04-06.md", "file_type": "document", "degree": 12}, {"id": "research_dams_delhi_dr_sumer_sethi", "label": "Dr. Sumer Sethi (Founder, DAMS)", "color": {"background": "#4E79A7", "border": "#4E79A7", "highlight": {"background": "#ffffff", "border": "#4E79A7"}}, "size": 15.0, "font": {"size": 12, "color": "#ffffff"}, "title": "Dr. Sumer Sethi (Founder, DAMS)", "community": 0, "community_name": "DAMS Delhi Ecosystem", "source_file": "reports/research-dams-delhi-2026-04-06.md", "file_type": "document", "degree": 2}, {"id": "research_dams_delhi_emedicoz", "label": "eMedicoz Platform", "color": {"background": "#EDC948", "border": "#EDC948", "highlight": {"background": "#ffffff", "border": "#EDC948"}}, "size": 15.0, "font": {"size": 12, "color": "#ffffff"}, "title": "eMedicoz Platform", "community": 5, "community_name": "AI Enhancement & Platforms", "source_file": "reports/research-dams-delhi-2026-04-06.md", "file_type": "document", "degree": 2}, {"id": "research_dams_delhi_marrow", "label": "Marrow (DailyRounds)", "color": {"background": "#4E79A7", "border": "#4E79A7", "highlight": {"background": "#ffffff", "border": "#4E79A7"}}, "size": 20.0, "font": {"size": 12, "color": "#ffffff"}, "title": "Marrow (DailyRounds)", "community": 0, "community_name": "DAMS Delhi Ecosystem", "source_file": "reports/research-dams-delhi-2026-04-06.md", "file_type": "document", "degree": 4}, {"id": "research_dams_delhi_prepladder", "label": "PrepLadder (Unacademy)", "color": {"background": "#4E79A7", "border": "#4E79A7", "highlight": {"background": "#ffffff", "border": "#4E79A7"}}, "size": 15.0, "font": {"size": 12, "color": "#ffffff"}, "title": "PrepLadder (Unacademy)", "community": 0, "community_name": "DAMS Delhi Ecosystem", "source_file": "reports/research-dams-delhi-2026-04-06.md", "file_type": "document", "degree": 2}, {"id": "research_dams_delhi_content_studio", "label": "Content Studio (Gurugram)", "color": {"background": "#76B7B2", "border": "#76B7B2", "highlight": {"background": "#ffffff", "border": "#76B7B2"}}, "size": 37.5, "font": {"size": 12, "color": "#ffffff"}, "title": "Content Studio (Gurugram)", "community": 3, "community_name": "Content Studio & Podcast Market", "source_file": "reports/research-dams-delhi-2026-04-06.md", "file_type": "document", "degree": 11}, {"id": "research_dams_delhi_next_exam", "label": "NExT (National Exit Test)", "color": {"background": "#4E79A7", "border": "#4E79A7", "highlight": {"background": "#ffffff", "border": "#4E79A7"}}, "size": 15.0, "font": {"size": 12, "color": "#ffffff"}, "title": "NExT (National Exit Test)", "community": 0, "community_name": "DAMS Delhi Ecosystem", "source_file": "reports/research-dams-delhi-2026-04-06.md", "file_type": "document", "degree": 2}, {"id": "research_dams_delhi_production_quality_gap", "label": "Production Quality Gap (DAMS vs Competitors)", "color": {"background": "#F28E2B", "border": "#F28E2B", "highlight": {"background": "#ffffff", "border": "#F28E2B"}}, "size": 15.0, "font": {"size": 12, "color": "#ffffff"}, "title": "Production Quality Gap (DAMS vs Competitors)", "community": 1, "community_name": "ICME India & Quality Gaps", "source_file": "reports/research-dams-delhi-2026-04-06.md", "file_type": "document", "degree": 2}, {"id": "research_dams_delhi_dr_bhatia", "label": "Dr. Bhatia Medical Institute", "color": {"background": "#4E79A7", "border": "#4E79A7", "highlight": {"background": "#ffffff", "border": "#4E79A7"}}, "size": 12.5, "font": {"size": 0, "color": "#ffffff"}, "title": "Dr. Bhatia Medical Institute", "community": 0, "community_name": "DAMS Delhi Ecosystem", "source_file": "reports/research-dams-delhi-2026-04-06.md", "file_type": "document", "degree": 1}, {"id": "research_dams_delhi_pilot_proposal", "label": "DAMS Pilot Proposal (5-10 Hero Lectures)", "color": {"background": "#76B7B2", "border": "#76B7B2", "highlight": {"background": "#ffffff", "border": "#76B7B2"}}, "size": 15.0, "font": {"size": 12, "color": "#ffffff"}, "title": "DAMS Pilot Proposal (5-10 Hero Lectures)", "community": 3, "community_name": "Content Studio & Podcast Market", "source_file": "reports/research-dams-delhi-2026-04-06.md", "file_type": "document", "degree": 2}, {"id": "research_icme_india_icme", "label": "ICME India (Institute for Continuing Medical Education)", "color": {"background": "#F28E2B", "border": "#F28E2B", "highlight": {"background": "#ffffff", "border": "#F28E2B"}}, "size": 27.5, "font": {"size": 12, "color": "#ffffff"}, "title": "ICME India (Institute for Continuing Medical Education)", "community": 1, "community_name": "ICME India & Quality Gaps", "source_file": "reports/research-icme-india-2026-04-06.md", "file_type": "document", "degree": 7}, {"id": "research_icme_india_dr_suresh_prabhakar", "label": "Dr. Suresh Prabhakar (Director, ICME)", "color": {"background": "#F28E2B", "border": "#F28E2B", "highlight": {"background": "#ffffff", "border": "#F28E2B"}}, "size": 12.5, "font": {"size": 0, "color": "#ffffff"}, "title": "Dr. Suresh Prabhakar (Director, ICME)", "community": 1, "community_name": "ICME India & Quality Gaps", "source_file": "reports/research-icme-india-2026-04-06.md", "file_type": "document", "degree": 1}, {"id": "research_icme_india_intellect_medicos", "label": "Intellect Medicos", "color": {"background": "#F28E2B", "border": "#F28E2B", "highlight": {"background": "#ffffff", "border": "#F28E2B"}}, "size": 12.5, "font": {"size": 0, "color": "#ffffff"}, "title": "Intellect Medicos", "community": 1, "community_name": "ICME India & Quality Gaps", "source_file": "reports/research-icme-india-2026-04-06.md", "file_type": "document", "degree": 1}, {"id": "research_icme_india_digital_content_gap", "label": "Digital Content Gap (ICME)", "color": {"background": "#F28E2B", "border": "#F28E2B", "highlight": {"background": "#ffffff", "border": "#F28E2B"}}, "size": 17.5, "font": {"size": 12, "color": "#ffffff"}, "title": "Digital Content Gap (ICME)", "community": 1, "community_name": "ICME India & Quality Gaps", "source_file": "reports/research-icme-india-2026-04-06.md", "file_type": "document", "degree": 3}, {"id": "research_icme_india_plab_exam", "label": "PLAB Exam", "color": {"background": "#F28E2B", "border": "#F28E2B", "highlight": {"background": "#ffffff", "border": "#F28E2B"}}, "size": 12.5, "font": {"size": 0, "color": "#ffffff"}, "title": "PLAB Exam", "community": 1, "community_name": "ICME India & Quality Gaps", "source_file": "reports/research-icme-india-2026-04-06.md", "file_type": "document", "degree": 1}, {"id": "research_icme_india_gateiit", "label": "GATEIIT", "color": {"background": "#F28E2B", "border": "#F28E2B", "highlight": {"background": "#ffffff", "border": "#F28E2B"}}, "size": 12.5, "font": {"size": 0, "color": "#ffffff"}, "title": "GATEIIT", "community": 1, "community_name": "ICME India & Quality Gaps", "source_file": "reports/research-icme-india-2026-04-06.md", "file_type": "document", "degree": 1}, {"id": "research_osmosis_osmosis", "label": "Osmosis (Elsevier)", "color": {"background": "#E15759", "border": "#E15759", "highlight": {"background": "#ffffff", "border": "#E15759"}}, "size": 27.5, "font": {"size": 12, "color": "#ffffff"}, "title": "Osmosis (Elsevier)", "community": 2, "community_name": "Osmosis & Global Med-Ed", "source_file": "reports/research-osmosis-2026-04-06.md", "file_type": "document", "degree": 7}, {"id": "research_osmosis_elsevier", "label": "Elsevier (RELX Group)", "color": {"background": "#E15759", "border": "#E15759", "highlight": {"background": "#ffffff", "border": "#E15759"}}, "size": 12.5, "font": {"size": 0, "color": "#ffffff"}, "title": "Elsevier (RELX Group)", "community": 2, "community_name": "Osmosis & Global Med-Ed", "source_file": "reports/research-osmosis-2026-04-06.md", "file_type": "document", "degree": 1}, {"id": "research_osmosis_diffusion_studios", "label": "Diffusion Studios (Osmosis B2B Arm)", "color": {"background": "#E15759", "border": "#E15759", "highlight": {"background": "#ffffff", "border": "#E15759"}}, "size": 15.0, "font": {"size": 12, "color": "#ffffff"}, "title": "Diffusion Studios (Osmosis B2B Arm)", "community": 2, "community_name": "Osmosis & Global Med-Ed", "source_file": "reports/research-osmosis-2026-04-06.md", "file_type": "document", "degree": 2}, {"id": "research_osmosis_osmosis_ai", "label": "Osmosis AI (Study Companion)", "color": {"background": "#E15759", "border": "#E15759", "highlight": {"background": "#ffffff", "border": "#E15759"}}, "size": 12.5, "font": {"size": 0, "color": "#ffffff"}, "title": "Osmosis AI (Study Companion)", "community": 2, "community_name": "Osmosis & Global Med-Ed", "source_file": "reports/research-osmosis-2026-04-06.md", "file_type": "document", "degree": 1}, {"id": "research_osmosis_lecturio", "label": "Lecturio", "color": {"background": "#E15759", "border": "#E15759", "highlight": {"background": "#ffffff", "border": "#E15759"}}, "size": 12.5, "font": {"size": 0, "color": "#ffffff"}, "title": "Lecturio", "community": 2, "community_name": "Osmosis & Global Med-Ed", "source_file": "reports/research-osmosis-2026-04-06.md", "file_type": "document", "degree": 1}, {"id": "research_osmosis_ninja_nerd", "label": "Ninja Nerd", "color": {"background": "#E15759", "border": "#E15759", "highlight": {"background": "#ffffff", "border": "#E15759"}}, "size": 12.5, "font": {"size": 0, "color": "#ffffff"}, "title": "Ninja Nerd", "community": 2, "community_name": "Osmosis & Global Med-Ed", "source_file": "reports/research-osmosis-2026-04-06.md", "file_type": "document", "degree": 1}, {"id": "research_osmosis_no_live_video_gap", "label": "No Live Instructor Video (Osmosis Gap)", "color": {"background": "#E15759", "border": "#E15759", "highlight": {"background": "#ffffff", "border": "#E15759"}}, "size": 15.0, "font": {"size": 12, "color": "#ffffff"}, "title": "No Live Instructor Video (Osmosis Gap)", "community": 2, "community_name": "Osmosis & Global Med-Ed", "source_file": "reports/research-osmosis-2026-04-06.md", "file_type": "document", "degree": 2}, {"id": "podcast_market_scan_cellar_door", "label": "Cellar Door Studios (Gurgaon)", "color": {"background": "#76B7B2", "border": "#76B7B2", "highlight": {"background": "#ffffff", "border": "#76B7B2"}}, "size": 15.0, "font": {"size": 12, "color": "#ffffff"}, "title": "Cellar Door Studios (Gurgaon)", "community": 3, "community_name": "Content Studio & Podcast Market", "source_file": "reports/podcast-production-market-scan-2026-04-06.md", "file_type": "document", "degree": 2}, {"id": "podcast_market_scan_garage_productions", "label": "Garage Productions (Delhi NCR)", "color": {"background": "#76B7B2", "border": "#76B7B2", "highlight": {"background": "#ffffff", "border": "#76B7B2"}}, "size": 15.0, "font": {"size": 12, "color": "#ffffff"}, "title": "Garage Productions (Delhi NCR)", "community": 3, "community_name": "Content Studio & Podcast Market", "source_file": "reports/podcast-production-market-scan-2026-04-06.md", "file_type": "document", "degree": 2}, {"id": "podcast_market_scan_dawar_studios", "label": "Dawar Studios (Gurgaon)", "color": {"background": "#59A14F", "border": "#59A14F", "highlight": {"background": "#ffffff", "border": "#59A14F"}}, "size": 10.0, "font": {"size": 0, "color": "#ffffff"}, "title": "Dawar Studios (Gurgaon)", "community": 4, "community_name": "Delhi NCR Studios", "source_file": "reports/podcast-production-market-scan-2026-04-06.md", "file_type": "document", "degree": 0}, {"id": "podcast_market_scan_spooler", "label": "Spooler (AI-Powered Audio)", "color": {"background": "#EDC948", "border": "#EDC948", "highlight": {"background": "#ffffff", "border": "#EDC948"}}, "size": 12.5, "font": {"size": 0, "color": "#ffffff"}, "title": "Spooler (AI-Powered Audio)", "community": 5, "community_name": "AI Enhancement & Platforms", "source_file": "reports/podcast-production-market-scan-2026-04-06.md", "file_type": "document", "degree": 1}, {"id": "podcast_market_scan_acoustic_isolation", "label": "4-Layer Acoustic Isolation (Content Studio)", "color": {"background": "#76B7B2", "border": "#76B7B2", "highlight": {"background": "#ffffff", "border": "#76B7B2"}}, "size": 15.0, "font": {"size": 12, "color": "#ffffff"}, "title": "4-Layer Acoustic Isolation (Content Studio)", "community": 3, "community_name": "Content Studio & Podcast Market", "source_file": "reports/podcast-production-market-scan-2026-04-06.md", "file_type": "document", "degree": 2}, {"id": "podcast_market_scan_cs_labs_ai", "label": "CS Labs (AI Enhancement Services)", "color": {"background": "#EDC948", "border": "#EDC948", "highlight": {"background": "#ffffff", "border": "#EDC948"}}, "size": 17.5, "font": {"size": 12, "color": "#ffffff"}, "title": "CS Labs (AI Enhancement Services)", "community": 5, "community_name": "AI Enhancement & Platforms", "source_file": "reports/podcast-production-market-scan-2026-04-06.md", "file_type": "document", "degree": 3}, {"id": "outreach_dams_outreach_strategy", "label": "DAMS Outreach Strategy", "color": {"background": "#4E79A7", "border": "#4E79A7", "highlight": {"background": "#ffffff", "border": "#4E79A7"}}, "size": 22.5, "font": {"size": 12, "color": "#ffffff"}, "title": "DAMS Outreach Strategy", "community": 0, "community_name": "DAMS Delhi Ecosystem", "source_file": "reports/outreach-dams-delhi-2026-04-06.md", "file_type": "document", "degree": 5}, {"id": "research_dams_delhi_ai_audio_enhancement", "label": "AI Audio Enhancement Service (INR 8,000/hr)", "color": {"background": "#EDC948", "border": "#EDC948", "highlight": {"background": "#ffffff", "border": "#EDC948"}}, "size": 15.0, "font": {"size": 12, "color": "#ffffff"}, "title": "AI Audio Enhancement Service (INR 8,000/hr)", "community": 5, "community_name": "AI Enhancement & Platforms", "source_file": "reports/research-dams-delhi-2026-04-06.md", "file_type": "document", "degree": 2}, {"id": "research_dams_delhi_neet_pg", "label": "NEET PG Exam", "color": {"background": "#4E79A7", "border": "#4E79A7", "highlight": {"background": "#ffffff", "border": "#4E79A7"}}, "size": 12.5, "font": {"size": 0, "color": "#ffffff"}, "title": "NEET PG Exam", "community": 0, "community_name": "DAMS Delhi Ecosystem", "source_file": "reports/research-dams-delhi-2026-04-06.md", "file_type": "document", "degree": 1}, {"id": "podcast_market_scan_iccpl_group", "label": "ICCPL Group (PR Agency)", "color": {"background": "#76B7B2", "border": "#76B7B2", "highlight": {"background": "#ffffff", "border": "#76B7B2"}}, "size": 12.5, "font": {"size": 0, "color": "#ffffff"}, "title": "ICCPL Group (PR Agency)", "community": 3, "community_name": "Content Studio & Podcast Market", "source_file": "reports/podcast-production-market-scan-2026-04-06.md", "file_type": "document", "degree": 1}, {"id": "podcast_market_scan_bound_india", "label": "Bound India", "color": {"background": "#B07AA1", "border": "#B07AA1", "highlight": {"background": "#ffffff", "border": "#B07AA1"}}, "size": 10.0, "font": {"size": 0, "color": "#ffffff"}, "title": "Bound India", "community": 6, "community_name": "Podcast Partnerships", "source_file": "reports/podcast-production-market-scan-2026-04-06.md", "file_type": "document", "degree": 0}];
+const RAW_EDGES = [{"from": "research_dams_delhi_dams", "to": "research_dams_delhi_dr_sumer_sethi", "label": "references", "title": "references [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "research_dams_delhi_dams", "to": "research_dams_delhi_emedicoz", "label": "implements", "title": "implements [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "research_dams_delhi_dams", "to": "research_dams_delhi_marrow", "label": "conceptually_related_to", "title": "conceptually_related_to [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "research_dams_delhi_dams", "to": "research_dams_delhi_prepladder", "label": "conceptually_related_to", "title": "conceptually_related_to [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "research_dams_delhi_dams", "to": "research_dams_delhi_next_exam", "label": "references", "title": "references [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "research_dams_delhi_dams", "to": "research_dams_delhi_production_quality_gap", "label": "rationale_for", "title": "rationale_for [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "research_dams_delhi_dams", "to": "research_dams_delhi_content_studio", "label": "conceptually_related_to", "title": "conceptually_related_to [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "research_dams_delhi_dams", "to": "research_dams_delhi_pilot_proposal", "label": "references", "title": "references [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "research_dams_delhi_dams", "to": "research_dams_delhi_dr_bhatia", "label": "conceptually_related_to", "title": "conceptually_related_to [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "research_dams_delhi_dams", "to": "research_dams_delhi_neet_pg", "label": "references", "title": "references [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "research_dams_delhi_dams", "to": "outreach_dams_outreach_strategy", "label": "references", "title": "references [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "research_dams_delhi_dams", "to": "research_icme_india_icme", "label": "semantically_similar_to", "title": "semantically_similar_to [INFERRED]", "dashes": true, "width": 1, "color": {"opacity": 0.35}, "confidence": "INFERRED"}, {"from": "research_dams_delhi_dr_sumer_sethi", "to": "outreach_dams_outreach_strategy", "label": "references", "title": "references [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "research_dams_delhi_emedicoz", "to": "research_dams_delhi_ai_audio_enhancement", "label": "conceptually_related_to", "title": "conceptually_related_to [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "research_dams_delhi_marrow", "to": "research_dams_delhi_content_studio", "label": "shares_data_with", "title": "shares_data_with [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "research_dams_delhi_marrow", "to": "research_osmosis_osmosis", "label": "conceptually_related_to", "title": "conceptually_related_to [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "research_dams_delhi_marrow", "to": "research_dams_delhi_prepladder", "label": "semantically_similar_to", "title": "semantically_similar_to [INFERRED]", "dashes": true, "width": 1, "color": {"opacity": 0.35}, "confidence": "INFERRED"}, {"from": "research_dams_delhi_content_studio", "to": "research_dams_delhi_pilot_proposal", "label": "references", "title": "references [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "research_dams_delhi_content_studio", "to": "research_icme_india_icme", "label": "conceptually_related_to", "title": "conceptually_related_to [INFERRED]", "dashes": true, "width": 1, "color": {"opacity": 0.35}, "confidence": "INFERRED"}, {"from": "research_dams_delhi_content_studio", "to": "research_osmosis_diffusion_studios", "label": "conceptually_related_to", "title": "conceptually_related_to [INFERRED]", "dashes": true, "width": 1, "color": {"opacity": 0.35}, "confidence": "INFERRED"}, {"from": "research_dams_delhi_content_studio", "to": "podcast_market_scan_cellar_door", "label": "conceptually_related_to", "title": "conceptually_related_to [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "research_dams_delhi_content_studio", "to": "podcast_market_scan_garage_productions", "label": "conceptually_related_to", "title": "conceptually_related_to [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "research_dams_delhi_content_studio", "to": "podcast_market_scan_acoustic_isolation", "label": "references", "title": "references [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "research_dams_delhi_content_studio", "to": "podcast_market_scan_cs_labs_ai", "label": "references", "title": "references [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "research_dams_delhi_content_studio", "to": "podcast_market_scan_iccpl_group", "label": "conceptually_related_to", "title": "conceptually_related_to [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "research_dams_delhi_content_studio", "to": "outreach_dams_outreach_strategy", "label": "references", "title": "references [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "research_dams_delhi_next_exam", "to": "outreach_dams_outreach_strategy", "label": "references", "title": "references [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "research_dams_delhi_production_quality_gap", "to": "research_icme_india_digital_content_gap", "label": "semantically_similar_to", "title": "semantically_similar_to [INFERRED]", "dashes": true, "width": 1, "color": {"opacity": 0.35}, "confidence": "INFERRED"}, {"from": "research_icme_india_icme", "to": "research_icme_india_dr_suresh_prabhakar", "label": "references", "title": "references [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "research_icme_india_icme", "to": "research_icme_india_plab_exam", "label": "references", "title": "references [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "research_icme_india_icme", "to": "research_icme_india_intellect_medicos", "label": "conceptually_related_to", "title": "conceptually_related_to [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "research_icme_india_icme", "to": "research_icme_india_digital_content_gap", "label": "rationale_for", "title": "rationale_for [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "research_icme_india_icme", "to": "research_icme_india_gateiit", "label": "conceptually_related_to", "title": "conceptually_related_to [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "research_icme_india_digital_content_gap", "to": "research_osmosis_no_live_video_gap", "label": "semantically_similar_to", "title": "semantically_similar_to [INFERRED]", "dashes": true, "width": 1, "color": {"opacity": 0.35}, "confidence": "INFERRED"}, {"from": "research_osmosis_osmosis", "to": "research_osmosis_elsevier", "label": "references", "title": "references [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "research_osmosis_osmosis", "to": "research_osmosis_diffusion_studios", "label": "implements", "title": "implements [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "research_osmosis_osmosis", "to": "research_osmosis_osmosis_ai", "label": "implements", "title": "implements [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "research_osmosis_osmosis", "to": "research_osmosis_no_live_video_gap", "label": "rationale_for", "title": "rationale_for [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "research_osmosis_osmosis", "to": "research_osmosis_lecturio", "label": "conceptually_related_to", "title": "conceptually_related_to [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "research_osmosis_osmosis", "to": "research_osmosis_ninja_nerd", "label": "conceptually_related_to", "title": "conceptually_related_to [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "podcast_market_scan_cellar_door", "to": "podcast_market_scan_garage_productions", "label": "semantically_similar_to", "title": "semantically_similar_to [INFERRED]", "dashes": true, "width": 1, "color": {"opacity": 0.35}, "confidence": "INFERRED"}, {"from": "podcast_market_scan_spooler", "to": "podcast_market_scan_cs_labs_ai", "label": "semantically_similar_to", "title": "semantically_similar_to [INFERRED]", "dashes": true, "width": 1, "color": {"opacity": 0.35}, "confidence": "INFERRED"}, {"from": "podcast_market_scan_acoustic_isolation", "to": "outreach_dams_outreach_strategy", "label": "references", "title": "references [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "podcast_market_scan_cs_labs_ai", "to": "research_dams_delhi_ai_audio_enhancement", "label": "semantically_similar_to", "title": "semantically_similar_to [INFERRED]", "dashes": true, "width": 1, "color": {"opacity": 0.35}, "confidence": "INFERRED"}];
+const LEGEND = [{"cid": 0, "color": "#4E79A7", "label": "DAMS Delhi Ecosystem", "count": 8}, {"cid": 1, "color": "#F28E2B", "label": "ICME India & Quality Gaps", "count": 7}, {"cid": 2, "color": "#E15759", "label": "Osmosis & Global Med-Ed", "count": 7}, {"cid": 3, "color": "#76B7B2", "label": "Content Studio & Podcast Market", "count": 6}, {"cid": 4, "color": "#59A14F", "label": "Delhi NCR Studios", "count": 1}, {"cid": 5, "color": "#EDC948", "label": "AI Enhancement & Platforms", "count": 4}, {"cid": 6, "color": "#B07AA1", "label": "Podcast Partnerships", "count": 1}];
+
+// Build vis datasets
+const nodesDS = new vis.DataSet(RAW_NODES.map(n => ({
+  id: n.id, label: n.label, color: n.color, size: n.size,
+  font: n.font, title: n.title,
+  _community: n.community, _community_name: n.community_name,
+  _source_file: n.source_file, _file_type: n.file_type, _degree: n.degree,
+})));
+
+const edgesDS = new vis.DataSet(RAW_EDGES.map((e, i) => ({
+  id: i, from: e.from, to: e.to,
+  label: '',
+  title: e.title,
+  dashes: e.dashes,
+  width: e.width,
+  color: e.color,
+  arrows: { to: { enabled: true, scaleFactor: 0.5 } },
+})));
+
+const container = document.getElementById('graph');
+const network = new vis.Network(container, { nodes: nodesDS, edges: edgesDS }, {
+  physics: {
+    enabled: true,
+    solver: 'forceAtlas2Based',
+    forceAtlas2Based: {
+      gravitationalConstant: -60,
+      centralGravity: 0.005,
+      springLength: 120,
+      springConstant: 0.08,
+      damping: 0.4,
+      avoidOverlap: 0.8,
+    },
+    stabilization: { iterations: 200, fit: true },
+  },
+  interaction: {
+    hover: true,
+    tooltipDelay: 100,
+    hideEdgesOnDrag: true,
+    navigationButtons: false,
+    keyboard: false,
+  },
+  nodes: { shape: 'dot', borderWidth: 1.5 },
+  edges: { smooth: { type: 'continuous', roundness: 0.2 }, selectionWidth: 3 },
+});
+
+network.once('stabilizationIterationsDone', () => {
+  network.setOptions({ physics: { enabled: false } });
+});
+
+function showInfo(nodeId) {
+  const n = nodesDS.get(nodeId);
+  if (!n) return;
+  const neighborIds = network.getConnectedNodes(nodeId);
+  const neighborItems = neighborIds.map(nid => {
+    const nb = nodesDS.get(nid);
+    const color = nb ? nb.color.background : '#555';
+    return `<span class="neighbor-link" style="border-left-color:${color}" onclick="focusNode('${nid}')">${nb ? nb.label : nid}</span>`;
+  }).join('');
+  document.getElementById('info-content').innerHTML = `
+    <div class="field"><b>${n.label}</b></div>
+    <div class="field">Type: ${n._file_type || 'unknown'}</div>
+    <div class="field">Community: ${n._community_name}</div>
+    <div class="field">Source: ${n._source_file || '-'}</div>
+    <div class="field">Degree: ${n._degree}</div>
+    ${neighborIds.length ? `<div class="field" style="margin-top:8px;color:#aaa;font-size:11px">Neighbors (${neighborIds.length})</div><div id="neighbors-list">${neighborItems}</div>` : ''}
+  `;
+}
+
+function focusNode(nodeId) {
+  network.focus(nodeId, { scale: 1.4, animation: true });
+  network.selectNodes([nodeId]);
+  showInfo(nodeId);
+}
+
+network.on('click', params => {
+  if (params.nodes.length > 0) showInfo(params.nodes[0]);
+  else document.getElementById('info-content').innerHTML = '<span class="empty">Click a node to inspect it</span>';
+});
+
+const searchInput = document.getElementById('search');
+const searchResults = document.getElementById('search-results');
+searchInput.addEventListener('input', () => {
+  const q = searchInput.value.toLowerCase().trim();
+  searchResults.innerHTML = '';
+  if (!q) { searchResults.style.display = 'none'; return; }
+  const matches = RAW_NODES.filter(n => n.label.toLowerCase().includes(q)).slice(0, 20);
+  if (!matches.length) { searchResults.style.display = 'none'; return; }
+  searchResults.style.display = 'block';
+  matches.forEach(n => {
+    const el = document.createElement('div');
+    el.className = 'search-item';
+    el.textContent = n.label;
+    el.style.borderLeft = `3px solid ${n.color.background}`;
+    el.style.paddingLeft = '8px';
+    el.onclick = () => {
+      network.focus(n.id, { scale: 1.5, animation: true });
+      network.selectNodes([n.id]);
+      showInfo(n.id);
+      searchResults.style.display = 'none';
+      searchInput.value = '';
+    };
+    searchResults.appendChild(el);
+  });
+});
+document.addEventListener('click', e => {
+  if (!searchResults.contains(e.target) && e.target !== searchInput)
+    searchResults.style.display = 'none';
+});
+
+const hiddenCommunities = new Set();
+const legendEl = document.getElementById('legend');
+LEGEND.forEach(c => {
+  const item = document.createElement('div');
+  item.className = 'legend-item';
+  item.innerHTML = `<div class="legend-dot" style="background:${c.color}"></div>
+    <span class="legend-label">${c.label}</span>
+    <span class="legend-count">${c.count}</span>`;
+  item.onclick = () => {
+    if (hiddenCommunities.has(c.cid)) {
+      hiddenCommunities.delete(c.cid);
+      item.classList.remove('dimmed');
+    } else {
+      hiddenCommunities.add(c.cid);
+      item.classList.add('dimmed');
+    }
+    const updates = RAW_NODES
+      .filter(n => n.community === c.cid)
+      .map(n => ({ id: n.id, hidden: hiddenCommunities.has(c.cid) }));
+    nodesDS.update(updates);
+  };
+  legendEl.appendChild(item);
+});
+</script>
+<script>
+// Render hyperedges as shaded regions
+const hyperedges = [{"id": "medical_education_prospect_pipeline", "label": "Content Studio Medical Education Prospect Pipeline", "nodes": ["research_dams_delhi_content_studio", "research_dams_delhi_dams", "research_icme_india_icme", "research_osmosis_osmosis"], "relation": "participate_in", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": "reports/research-dams-delhi-2026-04-06.md"}, {"id": "production_quality_gap_pattern", "label": "Production Quality Gap Driving CS Opportunity", "nodes": ["research_dams_delhi_production_quality_gap", "research_icme_india_digital_content_gap", "research_osmosis_no_live_video_gap"], "relation": "form", "confidence": "INFERRED", "confidence_score": 0.85, "source_file": "reports/research-dams-delhi-2026-04-06.md"}, {"id": "delhi_ncr_podcast_competitive_landscape", "label": "Delhi NCR Podcast Production Competitive Landscape", "nodes": ["research_dams_delhi_content_studio", "podcast_market_scan_cellar_door", "podcast_market_scan_garage_productions", "podcast_market_scan_dawar_studios"], "relation": "participate_in", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": "reports/podcast-production-market-scan-2026-04-06.md"}];
+function drawHyperedges() {
+    const canvas = network.canvas.frame.canvas;
+    const ctx = canvas.getContext('2d');
+    hyperedges.forEach(h => {
+        const positions = h.nodes
+            .map(nid => network.getPositions([nid])[nid])
+            .filter(p => p !== undefined);
+        if (positions.length < 2) return;
+        // Draw convex hull as filled polygon
+        ctx.save();
+        ctx.globalAlpha = 0.12;
+        ctx.fillStyle = '#6366f1';
+        ctx.strokeStyle = '#6366f1';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        const scale = network.getScale();
+        const offset = network.getViewPosition();
+        const toCanvas = (p) => ({
+            x: (p.x - offset.x) * scale + canvas.width / 2,
+            y: (p.y - offset.y) * scale + canvas.height / 2
+        });
+        const pts = positions.map(toCanvas);
+        // Expand hull slightly
+        const cx = pts.reduce((s, p) => s + p.x, 0) / pts.length;
+        const cy = pts.reduce((s, p) => s + p.y, 0) / pts.length;
+        const expanded = pts.map(p => ({
+            x: cx + (p.x - cx) * 1.15,
+            y: cy + (p.y - cy) * 1.15
+        }));
+        ctx.moveTo(expanded[0].x, expanded[0].y);
+        expanded.slice(1).forEach(p => ctx.lineTo(p.x, p.y));
+        ctx.closePath();
+        ctx.fill();
+        ctx.globalAlpha = 0.4;
+        ctx.stroke();
+        // Label
+        ctx.globalAlpha = 0.8;
+        ctx.fillStyle = '#4f46e5';
+        ctx.font = 'bold 11px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText(h.label, cx, cy - 5);
+        ctx.restore();
+    });
+}
+network.on('afterDrawing', drawHyperedges);
+</script>
+</body>
+</html>
